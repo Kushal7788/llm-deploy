@@ -51,7 +51,11 @@ async def query_endpoint(request: Request, query: QueryRequest,
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+# Add health check endpoint at root path
+@app.get("/")
+async def health_check():
+    return {"status": "healthy", "service": "llm-chat"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8007)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

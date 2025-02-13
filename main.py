@@ -18,8 +18,8 @@ llm = OllamaLLM(
     num_batch=8192,        # Increased batch size for maximum throughput
     num_thread=8,          # Use all 8 vCPUs
     num_gpu=1,             # Single GPU with 44GB VRAM
-    gpu_layers=120,        # Maximum GPU offloading for 70B model
-    f16_kv=True,          # Half-precision for key/value cache
+    gpu_layers=128,        # Increased from 120 to load more layers on GPU
+    f16_kv=False,         # Removed half-precision to use more VRAM
     mmap=True,            # Memory mapping for faster loading
     rope_scaling={         # RoPE scaling for maximum context
         "type": "dynamic",

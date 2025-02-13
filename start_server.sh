@@ -20,9 +20,9 @@ if ! pgrep -x "ollama" > /dev/null; then
 fi
 
 # Check if model is available, if not pull it
-if ! ollama list | grep -q "llama3.1"; then
-    echo "Pulling llama3.1 model... This may take a few minutes..."
-    ollama pull llama3.1
+if ! ollama list | grep -q "llama3.3:70b-instruct-q3_K_M"; then
+    echo "Pulling llama3.3:70b-instruct-q3_K_M model... This may take a few minutes..."
+    ollama pull llama3.3:70b-instruct-q3_K_M
     echo "Model pull completed!"
 fi
 
@@ -36,7 +36,7 @@ if ! tmux has-session -t monitoring 2>/dev/null; then
     # Send commands to each pane
     tmux send-keys -t 0 'nvidia-smi -l 1' C-m
     tmux send-keys -t 1 'htop' C-m
-    tmux send-keys -t 2 'iostat -x 1' C-m
+    tmux send-keys -t 2 'nvidia-smi -l 1' C-m
     
     echo "Monitoring started in tmux session. Attach with: tmux attach-session -t monitoring"
 fi

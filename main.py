@@ -14,17 +14,16 @@ import uvicorn
 # Maximum resource configuration for g6e.2xlarge (64GB RAM, 44GB VRAM)
 llm = OllamaLLM(
     model="llama3.3:70b-instruct-q3_K_M",
-    num_ctx=131072,        # Maximum context length (128K tokens)
-    num_batch=4096,        # Increased batch size for maximum throughput
+    num_ctx=32768,        # Maximum context length (128K tokens)
+    num_batch=2048,        # Increased batch size for maximum throughput
     num_thread=8,          # Use all 8 vCPUs
     num_gpu=1,             # Single GPU with 44GB VRAM
     gpu_layers=140,        # Increased from 120 to load more layers on GPU
     f16_kv=True,         # Removed half-precision to use more VRAM
     mmap=True,            # Memory mapping for faster loading
     rope_scaling={         # RoPE scaling for maximum context
-        "type": "dynamic",
-        "factor": 12.0,
-        "scale": 4.0
+        "type": "linear",
+        "factor": 4.0,
     },
     cache_capacity=16000,  # Larger cache with available RAM
     seed=42,              # Deterministic output

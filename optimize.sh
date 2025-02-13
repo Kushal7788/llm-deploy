@@ -33,7 +33,7 @@ sleep 10
 echo "Pulling model..."
 ollama pull llama3.1
 
-# Start the FastAPI server
+# Start the FastAPI server with proper worker configuration
 echo "Starting FastAPI server..."
 source venv/bin/activate  # Assuming you're using a virtual environment
-python main.py
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --loop uvloop --http httptools --limit-concurrency 32 --backlog 2048

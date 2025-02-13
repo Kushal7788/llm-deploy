@@ -66,7 +66,6 @@ async def query_endpoint(request: Request, query: QueryRequest,
         # Call Ollama to run the Llama 3.1 7B model with the provided prompt.
         # The following command assumes that the Ollama CLI is installed and available in the PATH.
         # Adjust the command and its arguments if necessary.
-        llm = OllamaLLM(model="llama3.1")
         response = llm.invoke(prompt)
         return {"response": response}
     except Exception as e:

@@ -11,7 +11,22 @@ from slowapi.errors import RateLimitExceeded
 from langchain_ollama import OllamaLLM
 import uvicorn
 
-llm = OllamaLLM(model="llama3.1")
+# Maximum resource configuration for g4ad.xlarge
+llm = OllamaLLM(
+    model="llama3.1",
+    num_ctx=16384,         # Larger context window (using ~8GB RAM)
+    num_batch=1024,        # Maximum batch size for throughput
+    num_thread=4,          # Use all 4 vCPUs
+    num_gpu=1,            # Single GPU
+    gpu_layers=40,        # Aggressive GPU offloading
+    f16_kv=True,          # Half-precision for key/value cache
+    mmap=True,           # Memory mapping for faster loading
+    rope_scaling={"type": "linear", "factor": 2.0},  # Extended context scaling
+    cache_capacity=2000,  # Cache more results in memory
+    seed=42,             # Deterministic output
+    numa=True,           # NUMA optimization
+    embedding_mode=True  # Enable embedding computation on GPU
+)
 
 # Define the API key (it can be overridden by an environment variable)
 API_KEY = os.environ.get("API_KEY", "1234")
@@ -57,5 +72,17 @@ async def query_endpoint(request: Request, query: QueryRequest,
 async def health_check():
     return {"status": "healthy", "service": "llm-chat"}
 
+# Increase the worker count for FastAPI
+worker_count = 4  # Match vCPU count
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app, 
+        host="0.0.0.0", 
+        port=8000,
+        workers=worker_count,
+        loop="uvloop",        # Faster event loop
+        http="httptools",     # Faster HTTP
+        limit_concurrency=32, # Limit concurrent connections
+        backlog=2048         # Larger connection queue
+    )

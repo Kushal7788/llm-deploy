@@ -61,18 +61,18 @@ if ! command -v ollama &> /dev/null; then
     curl -fsSL https://ollama.com/install.sh | sh
 fi
 
-# Start monitoring in new tmux sessions
-if command -v tmux &> /dev/null; then
-    # Create a new tmux session
-    tmux
+# # Start monitoring in new tmux sessions
+# if command -v tmux &> /dev/null; then
+#     # Create a new tmux session
+#     tmux
     
-    # Send commands to each pane
-    tmux send-keys -t 0 'nvidia-smi -l 1' C-m  # GPU monitoring
-    tmux send-keys -t 1 'htop' C-m             # CPU and memory monitoring
-    tmux send-keys -t 2 'iostat -x 1' C-m      # I/O monitoring
+#     # Send commands to each pane
+#     tmux send-keys -t 0 'nvidia-smi -l 1' C-m  # GPU monitoring
+#     tmux send-keys -t 1 'htop' C-m             # CPU and memory monitoring
+#     tmux send-keys -t 2 'iostat -x 1' C-m      # I/O monitoring
 
-    echo "Monitoring started in tmux session. Attach with: tmux attach-session -t monitoring"
-fi
+#     echo "Monitoring started in tmux session. Attach with: tmux attach-session -t monitoring"
+# fi
 
 # Start Ollama with optimized settings
 echo "Starting Ollama service..."

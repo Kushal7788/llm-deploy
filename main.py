@@ -11,27 +11,29 @@ from slowapi.errors import RateLimitExceeded
 from langchain_ollama import OllamaLLM
 import uvicorn
 
-# Maximum resource configuration for g6e.2xlarge (64GB RAM, 44GB VRAM)
-llm = OllamaLLM(
-    model="llama3.3:70b-instruct-q3_K_M",
-    num_ctx=131072,        # Maximum context length (128K tokens)
-    num_batch=8192,        # Increased batch size for maximum throughput
-    num_thread=8,          # Use all 8 vCPUs
-    num_gpu=1,             # Single GPU with 44GB VRAM
-    gpu_layers=140,        # Increased from 120 to load more layers on GPU
-    f16_kv=False,         # Removed half-precision to use more VRAM
-    mmap=True,            # Memory mapping for faster loading
-    rope_scaling={         # RoPE scaling for maximum context
-        "type": "dynamic",
-        "factor": 12.0,
-        "scale": 4.0
-    },
-    cache_capacity=16000,  # Larger cache with available RAM
-    seed=42,              # Deterministic output
-    numa=True,            # NUMA optimization
-    embedding_mode=True,   # Enable embedding computation on GPU
-    tensor_split=[1],     # Use full GPU
-)
+# # # Maximum resource configuration for g6e.2xlarge (64GB RAM, 44GB VRAM)
+# llm = OllamaLLM(
+#     model="llama3.3:70b-instruct-q3_K_M",
+#     num_ctx=131072,        # Maximum context length (128K tokens)
+#     num_batch=12288,       # Large batch size for maximum throughput
+#     num_thread=8,          # Use all 8 vCPUs
+#     num_gpu=1,             # Single GPU with 44GB VRAM
+#     gpu_layers=80,         # Maximum layers for 70B model (all layers)
+#     f16_kv=True,          # Enable half-precision KV cache for better VRAM management
+#     mmap=True,            # Memory mapping for faster loading
+#     rope_scaling={         # RoPE scaling for maximum context
+#         "type": "dynamic",
+#         "factor": 12.0,
+#         "scale": 4.0
+#     },
+#     cache_capacity=32000,  # Large cache capacity
+#     seed=42,              # Deterministic output
+#     numa=True,            # NUMA optimization
+#     embedding_mode=True,   # Enable embedding computation on GPU
+#     tensor_split=[1],     # Use full GPU
+# )
+
+llm = OllamaLLM(model="llama3.3:70b-instruct-q3_K_M")
 
 # Define the API key (it can be overridden by an environment variable)
 API_KEY = os.environ.get("API_KEY", "1234")

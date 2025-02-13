@@ -5,7 +5,10 @@ echo "Installing necessary packages..."
 sudo apt update
 
 # Install Python, pip, and other necessary tools
-sudo apt install -y python3.11 python3.11-venv python3-pip htop iftop sysstat nvtop tmux
+sudo apt install -y software-properties-common
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y python3.11 python3-venv htop iftop sysstat nvtop tmux
 
 # Install NVIDIA drivers and CUDA toolkit if not already installed
 if ! command -v nvidia-smi &> /dev/null; then
@@ -14,10 +17,10 @@ if ! command -v nvidia-smi &> /dev/null; then
     sudo apt install -y nvidia-cuda-toolkit
 fi
 
-# Create and activate virtual environment
+# Create and activate virtual environment with specific Python version
 echo "Setting up Python virtual environment..."
 if [ ! -d "venv" ]; then
-    python3.11 -m venv venv
+    python3 -m venv venv
     echo "Virtual environment created!"
 fi
 
@@ -25,7 +28,8 @@ source venv/bin/activate
 
 # Install Python dependencies
 echo "Installing Python packages..."
-pip install --upgrade pip
+sudo apt install python3-pip
+
 pip install -r requirements.txt
 
 echo "Setting system optimizations..."
@@ -60,11 +64,7 @@ fi
 # Start monitoring in new tmux sessions
 if command -v tmux &> /dev/null; then
     # Create a new tmux session
-    tmux new-session -d -s monitoring
-
-    # Create and split windows for monitoring
-    tmux split-window -h
-    tmux split-window -v
+    tmux
     
     # Send commands to each pane
     tmux send-keys -t 0 'nvidia-smi -l 1' C-m  # GPU monitoring

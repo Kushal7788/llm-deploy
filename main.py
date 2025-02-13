@@ -11,21 +11,26 @@ from slowapi.errors import RateLimitExceeded
 from langchain_ollama import OllamaLLM
 import uvicorn
 
-# Maximum resource configuration for g4ad.xlarge
+# Maximum resource configuration for g6e.2xlarge (64GB RAM, 44GB VRAM)
 llm = OllamaLLM(
-    model="llama3.1",
-    num_ctx=16384,         # Larger context window (using ~8GB RAM)
-    num_batch=1024,        # Maximum batch size for throughput
-    num_thread=4,          # Use all 4 vCPUs
-    num_gpu=1,            # Single GPU
-    gpu_layers=40,        # Aggressive GPU offloading
+    model="llama3.3:70b-instruct-q3_K_M",
+    num_ctx=131072,        # Maximum context length (128K tokens)
+    num_batch=8192,        # Increased batch size for maximum throughput
+    num_thread=8,          # Use all 8 vCPUs
+    num_gpu=1,             # Single GPU with 44GB VRAM
+    gpu_layers=120,        # Maximum GPU offloading for 70B model
     f16_kv=True,          # Half-precision for key/value cache
-    mmap=True,           # Memory mapping for faster loading
-    rope_scaling={"type": "linear", "factor": 2.0},  # Extended context scaling
-    cache_capacity=2000,  # Cache more results in memory
-    seed=42,             # Deterministic output
-    numa=True,           # NUMA optimization
-    embedding_mode=True  # Enable embedding computation on GPU
+    mmap=True,            # Memory mapping for faster loading
+    rope_scaling={         # RoPE scaling for maximum context
+        "type": "dynamic",
+        "factor": 12.0,
+        "scale": 4.0
+    },
+    cache_capacity=16000,  # Larger cache with available RAM
+    seed=42,              # Deterministic output
+    numa=True,            # NUMA optimization
+    embedding_mode=True,   # Enable embedding computation on GPU
+    tensor_split=[1],     # Use full GPU
 )
 
 # Define the API key (it can be overridden by an environment variable)
@@ -73,7 +78,7 @@ async def health_check():
     return {"status": "healthy", "service": "llm-chat"}
 
 # Increase the worker count for FastAPI
-worker_count = 4  # Match vCPU count
+worker_count = 6  # Leave 2 cores for model inference
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -83,6 +88,6 @@ if __name__ == "__main__":
         workers=worker_count,
         loop="uvloop",        # Faster event loop
         http="httptools",     # Faster HTTP
-        limit_concurrency=32, # Limit concurrent connections
-        backlog=2048         # Larger connection queue
+        limit_concurrency=32, # Balanced for long-context processing
+        backlog=8192          # Large connection queue
     )

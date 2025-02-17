@@ -19,10 +19,17 @@ if ! pgrep -x "ollama" > /dev/null; then
     sleep 10
 fi
 
-# Check if model is available, if not pull it
-if ! ollama list | grep -q "llama3.3:70b-instruct-q3_K_M"; then
-    echo "Pulling llama3.3:70b-instruct-q3_K_M model... This may take a few minutes..."
-    ollama pull llama3.3:70b-instruct-q3_K_M
+# # Check if model is available, if not pull it for llama3.3:70b-instruct-q3_K_M
+# if ! ollama list | grep -q "llama3.3:70b-instruct-q3_K_M"; then
+#     echo "Pulling llama3.3:70b-instruct-q3_K_M model... This may take a few minutes..."
+#     ollama pull llama3.3:70b-instruct-q3_K_M
+#     echo "Model pull completed!"
+# fi
+
+# Check if model is available, if not pull it for deepseek-r1:70b-llama-distill-q4_K_M
+if ! ollama list | grep -q "deepseek-r1:70b-llama-distill-q4_K_M"; then
+    echo "Pulling deepseek-r1:70b-llama-distill-q4_K_M model... This may take a few minutes..."
+    ollama pull deepseek-r1:70b-llama-distill-q4_K_M
     echo "Model pull completed!"
 fi
 

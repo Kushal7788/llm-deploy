@@ -80,7 +80,10 @@ OLLAMA_HOST=0.0.0.0 OLLAMA_ORIGINS="*" ollama serve &
 
 sleep 10
 
-# Pull model with optimized settings
-echo "Pulling llama3.3:70b-instruct-q3_K_M model..."
-ollama pull llama3.3:70b-instruct-q3_K_M
+# # Pull model with optimized settings for llama3.3:70b-instruct-q3_K_M
+# echo "Pulling llama3.3:70b-instruct-q3_K_M model..."
+# ollama pull llama3.3:70b-instruct-q3_K_M
 
+# Pull model with optimized settings for deepseek-r1:70b-llama-distill-q4_K_M
+echo "Pulling deepseek-r1:70b-llama-distill-q4_K_M model..."
+ollama pull deepseek-r1:70b-llama-distill-q4_K_M

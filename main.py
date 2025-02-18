@@ -11,15 +11,12 @@ from slowapi.errors import RateLimitExceeded
 from langchain_ollama import OllamaLLM
 import uvicorn
 
-
-# Model: llama3.3:70b-instruct-q3_K_M
-# llm = OllamaLLM(model="llama3.3:70b-instruct-q3_K_M")
-
-# Model: deepseek-r1:70b-llama-distill-q4_K_M
-llm = OllamaLLM(model="deepseek-r1:70b-llama-distill-q4_K_M")
-
-# Define the API key (it can be overridden by an environment variable)
+# Get model name and API key from environment variables
+MODEL_NAME = os.environ.get("MODEL_NAME", "deepseek-r1:70b-llama-distill-q4_K_M")
 API_KEY = os.environ.get("API_KEY", "1234")
+
+# Initialize the LLM with the model from environment
+llm = OllamaLLM(model=MODEL_NAME)
 
 # Create the FastAPI app
 app = FastAPI()

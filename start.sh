@@ -93,6 +93,32 @@ install_ollama() {
     fi
 }
 
+setup_nginx() {
+    echo "Setting up Nginx reverse proxy..."
+    
+    # Install nginx if not already installed
+    if ! command -v nginx &> /dev/null; then
+        echo "Installing Nginx..."
+        sudo apt update
+        sudo apt install -y nginx
+    fi
+    
+    # Copy our nginx configuration
+    sudo cp nginx.conf /etc/nginx/sites-available/llm-chat
+    
+    # Enable the site
+    sudo ln -sf /etc/nginx/sites-available/llm-chat /etc/nginx/sites-enabled/
+    sudo rm -f /etc/nginx/sites-enabled/default
+
+    # Test Nginx configuration
+    sudo nginx -t
+
+    # Restart Nginx
+    sudo systemctl restart nginx
+
+    echo "Nginx setup completed"
+}
+
 setup_monitoring() {
     if ! tmux has-session -t llm-chat 2>/dev/null; then
         echo "Creating tmux session..."
@@ -130,38 +156,15 @@ start_server() {
         echo "Model pull completed!"
     fi
     
-    # Set default ports
+    # Set default port
     HTTP_PORT=${HTTP_PORT:-8000}
-    HTTPS_PORT=${HTTPS_PORT:-8443}
-    
-    # Check for SSL certificates
-    SSL_CERT_PATH=${SSL_CERT_PATH:-"./ssl/cert.pem"}
-    SSL_KEY_PATH=${SSL_KEY_PATH:-"./ssl/key.pem"}
-    
-    # Create SSL directory if it doesn't exist
-    if [ ! -d "ssl" ]; then
-        mkdir ssl
-    fi
-    
-    # Generate self-signed certificate if none exists
-    if [ ! -f "$SSL_CERT_PATH" ] || [ ! -f "$SSL_KEY_PATH" ]; then
-        echo "Generating self-signed SSL certificate..."
-        openssl req -x509 -newkey rsa:4096 -nodes \
-            -out "$SSL_CERT_PATH" \
-            -keyout "$SSL_KEY_PATH" \
-            -days 365 \
-            -subj "/C=US/ST=State/L=City/O=Organization/CN=*"
-    fi
     
     # Start the FastAPI server with all configuration
     echo "Starting FastAPI server..."
     ENVIRONMENT="production" \
     MODEL_NAME="$MODEL_NAME" \
     API_KEY="$API_KEY" \
-    SSL_CERT_PATH="$SSL_CERT_PATH" \
-    SSL_KEY_PATH="$SSL_KEY_PATH" \
     HTTP_PORT="$HTTP_PORT" \
-    HTTPS_PORT="$HTTPS_PORT" \
     ALLOWED_HOSTS="*" \
     CORS_ORIGINS="*" \
     python -m uvicorn main:app \
@@ -198,6 +201,7 @@ main() {
     setup_virtual_environment
     optimize_system
     install_ollama
+    setup_nginx
     setup_monitoring
     start_server
 }

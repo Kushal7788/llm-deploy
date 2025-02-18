@@ -1,8 +1,5 @@
 # main.py
 import os
-import subprocess
-import ssl
-from typing import Optional
 from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -16,13 +13,10 @@ import uvicorn
 # Environment variables with defaults
 MODEL_NAME = os.environ.get("MODEL_NAME", "deepseek-r1:70b-llama-distill-q4_K_M")
 API_KEY = os.environ.get("API_KEY", "1234")
-SSL_CERT = os.environ.get("SSL_CERT_PATH")
-SSL_KEY = os.environ.get("SSL_KEY_PATH")
 # Allow all hosts by default
 ALLOWED_HOSTS = ["*"]  # Allow all hosts
 CORS_ORIGINS = ["*"]   # Allow all origins
 HTTP_PORT = int(os.environ.get("HTTP_PORT", "8000"))
-HTTPS_PORT = int(os.environ.get("HTTPS_PORT", "8443"))
 WORKERS = int(os.environ.get("WORKERS", "6"))
 ENV = os.environ.get("ENVIRONMENT", "production")
 
@@ -32,7 +26,7 @@ llm = OllamaLLM(model=MODEL_NAME)
 # Create the FastAPI app
 app = FastAPI(
     title="LLM Chat API",
-    description="Production-ready LLM Chat API with HTTP/HTTPS support",
+    description="Production-ready LLM Chat API",
     version="1.0.0",
     docs_url=None if ENV == "production" else "/docs",
     redoc_url=None if ENV == "production" else "/redoc"
@@ -89,14 +83,12 @@ async def health_check():
         "environment": ENV
     }
 
-def run_server(ssl_context: Optional[ssl.SSLContext] = None, port: int = HTTP_PORT):
-    """Run the server with the specified configuration"""
+if __name__ == "__main__":
+    print(f"Starting HTTP server on port {HTTP_PORT}")
     uvicorn.run(
         app,
-        host="0.0.0.0",  # Allow connections from all network interfaces
-        port=port,
-        ssl_certfile=SSL_CERT if ssl_context else None,
-        ssl_keyfile=SSL_KEY if ssl_context else None,
+        host="0.0.0.0",
+        port=HTTP_PORT,
         workers=WORKERS,
         loop="uvloop",
         http="httptools",
@@ -107,18 +99,3 @@ def run_server(ssl_context: Optional[ssl.SSLContext] = None, port: int = HTTP_PO
         proxy_headers=True,
         forwarded_allow_ips="*",  # Trust forwarded IPs from all sources
     )
-
-if __name__ == "__main__":
-    # Create SSL context if certificates are provided
-    ssl_context = None
-    if SSL_CERT and SSL_KEY and os.path.exists(SSL_CERT) and os.path.exists(SSL_KEY):
-        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(SSL_CERT, SSL_KEY)
-        
-        # Run HTTPS server
-        print(f"Starting HTTPS server on port {HTTPS_PORT}")
-        run_server(ssl_context, HTTPS_PORT)
-    else:
-        # Run HTTP server
-        print(f"Starting HTTP server on port {HTTP_PORT}")
-        run_server()

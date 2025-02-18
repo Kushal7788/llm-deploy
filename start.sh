@@ -97,16 +97,14 @@ setup_monitoring() {
     if ! tmux has-session -t llm-chat 2>/dev/null; then
         echo "Creating tmux session..."
         # Create new tmux session with name llm-chat
-        tmux new-session -d -s llm-chat -n monitoring
-        
-        # Split the window for monitoring
-        tmux split-window -h -t llm-chat:monitoring
-        tmux split-window -v -t llm-chat:monitoring
+        tmux new-session -d -s llm-chat
+        tmux split-window -h
+        tmux split-window -v
         
         # Send commands to each pane
-        tmux send-keys -t llm-chat:monitoring.0 'nvidia-smi -l 1' C-m
-        tmux send-keys -t llm-chat:monitoring.1 'htop' C-m
-        tmux send-keys -t llm-chat:monitoring.2 'iostat -x 1' C-m
+        tmux send-keys -t 0 'nvidia-smi -l 1' C-m
+        tmux send-keys -t 1 'htop' C-m
+        tmux send-keys -t 2 'nvidia-smi -l 1' C-m
         
         # Create new window for ollama with the specified model
         tmux new-window -t llm-chat -n ollama
